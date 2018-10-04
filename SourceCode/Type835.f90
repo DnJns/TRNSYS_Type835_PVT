@@ -8,13 +8,14 @@
 ! Editor: Danny Jonas
 ! Date:	 August 18, 2017
 ! Version: 3.1    
-! last modified: February 22, 2018
+! last modified: October 02, 2018
 ! 
 ! Modifications: 
 !           19.01.2018, DJ: Change Tref ind Tcell_ref and gross area as information added
 !           23.01.2018, DJ: Change and add model parameters, inputs and outputs to version 2.0   
 !           23.01.2018, DJ: Change code to version 3.0            
 !           22.02.2018, DJ: Bugfixes: Additional Calculation for theta in radians, maximum for theta and PRiam for negative values equal to zero 
+!           02.10.2018, DJ: Bugfixes: It for negative values equal to zero; Nomenclature Ucellfl
 ! *** 
 ! *** Model Parameters 
 ! *** 
@@ -29,7 +30,7 @@
 !			a - model parameter a for PV efficiency	m2/W [-Inf;+Inf]
 !			b - model parameter a for PV efficiency	- [-Inf;+Inf]
 !			c - model parameter a for PV efficiency	- [-Inf;+Inf]
-!			Uabsfl - internal heat transfer coefficient connecting cell and fluid temperature	W/m^2.K [0;+Inf]
+!			Ucellfl - internal heat transfer coefficient connecting cell and fluid temperature	W/m^2.K [0;+Inf]
 !			U0 - coeff. for module temperature (radiation)	W/m^2.K [-Inf;+Inf]
 !			U1 - coeff. for module temperature (wind)	W.s/m^3.K [-Inf;+Inf]
 !			Tcell_NOCT - PV Cell temperature at NOCT conditions	C [-Inf;+Inf]
@@ -98,7 +99,7 @@
       DOUBLE PRECISION a
       DOUBLE PRECISION b
       DOUBLE PRECISION c
-      DOUBLE PRECISION Uabsfl
+      DOUBLE PRECISION Ucellfl
       DOUBLE PRECISION U0
       DOUBLE PRECISION U1 
       DOUBLE PRECISION Tcell_NOCT
@@ -205,7 +206,7 @@
       a = getParameterValue(9)
       b = getParameterValue(10)
       c = getParameterValue(11)
-      Uabsfl = getParameterValue(12)*3.6d0
+      Ucellfl = getParameterValue(12)*3.6d0
       U0 = getParameterValue(13)*3.6d0
       U1 = getParameterValue(14)*3.6d0
       Tcell_NOCT = getParameterValue(15)
@@ -260,7 +261,7 @@
       a = getParameterValue(9)
       b = getParameterValue(10)
       c = getParameterValue(11)
-      Uabsfl = getParameterValue(12)*3.6d0
+      Ucellfl = getParameterValue(12)*3.6d0
       U0 = getParameterValue(13)*3.6d0
       U1 = getParameterValue(14)*3.6d0
       Tcell_NOCT = getParameterValue(15)
@@ -341,8 +342,15 @@
 !    Calculation of PR G
 !------------------------------------------------------------------------------
     
+    If(It>0) Then
+    
     PRg = a*It/3.6d0+b*LOG(It/3.6d0+1.d0)+c*((LOG(It/3.6d0+EXP(1.d0)))**2.d0/(It/3.6d0+1.d0)-1.d0) 
  
+    Else
+        
+    PRg = 0.d0
+    
+    EndIf
     
 !------------------------------------------------------------------------------
 !    Calculation of Tcell
@@ -350,7 +358,7 @@
 
     If(PVTmode==1) Then                         ! PVT model, internal calculation of cell temperature
     
-    Tcell = qth/(Uabsfl)+Tm 
+    Tcell = qth/(Ucellfl)+Tm 
     
     Elseif(PVTmode==2) Then                     ! PV model
                       
@@ -360,7 +368,7 @@
         
         Elseif(PVcellmode==2) Then              ! NOCT model, constant heat loss coefficient
             
-! Tcell = Tamb + It/It_NOCT * (Tcell_NOCT-Tamb_NOCT) * (1-Eta_ref/Taualpha)
+!       Tcell = Tamb + It/It_NOCT * (Tcell_NOCT-Tamb_NOCT) * (1-Eta_ref/Taualpha)
   
         k1 = Eta_ref*PRiam*PRg
         k2 = It/It_NOCT * (Tcell_NOCT-Tamb_NOCT)
