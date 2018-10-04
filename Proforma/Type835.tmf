@@ -1,0 +1,494 @@
+#ESI!
+3.0
+PV model (for PVT collectors)
+0
+
+Danny Jonas
+Universität des Saarlandes
+1
+
+2
+18
+August 21, 2017
+Universität des Saarlandes
+January 19, 2018
+1
+
+noowner
+__
+__
+__
+1
+PV model for the use as electrical part of PVT collectors or as stand-alone simplified PV model.
+0
+0
+0
+0
+0
+0
+__
+__
+__
+1
+
+0
+__
+__
+__
+__
+0
+0
+__
+
+__
+__
+__
+22
+It - Global radiation on PV plane
+SN
+1
+
+simple
+real
+1
++
+0
++Inf
+[ ; ]
+0
+0
+kJ/hr.m^2
+Flux
+Theta - Incidence angle of beam radiation
+SN
+1
+
+simple
+real
+1
++
+-360
++360
+[ ; ]
+0
+0
+degrees
+Direction (Angle)
+Tm - mean fluid temperature of the PVT collector
+SN
+1
+mean fluid temperature of the PVT collector (only for PVT mode 1)
+simple
+real
+1
++
+-Inf
++Inf
+[ ; ]
+0
+0
+C
+Temperature
+qth - specific thermal power output of the PVT collector
+SN
+1
+specific thermal power output of the PVT collector (only for PVT mode 1)
+simple
+real
+1
++
+-Inf
++Inf
+[ ; ]
+0
+0
+kJ/hr.m^2
+Flux
+Pel - Electric power output
+SN
+1
+Electric power output of the PV modules
+simple
+real
+2
++
+-Inf
++Inf
+[ ; ]
+0
+0
+kJ/hr
+Power
+Tcell - temperature of the PV cell
+SN
+1
+Temperature of the PV cell
+simple
+real
+2
++
+-Inf
++Inf
+[ ; ]
+0
+0
+C
+Temperature
+EtaPV - total efficiency of PV modules (gross area)
+SN
+1
+Gross area used for calculation
+simple
+real
+2
++
+0
+1
+[ ; ]
+0
+0
+-
+Dimensionless
+Area - Area of the  PVT collectors or PV modules (gross area)
+SN
+1
+Area of the  PVT collectors (PVTmode 1) or PV modules (PVmode 2), gross area
+simple
+real
+3
++
+0
++Inf
+[ ; ]
+10
+0
+m^2
+Area
+Eta_ref - electrical efficiency at reference conditions (gross area)
+SN
+1
+Electrical efficiency at reference (usually STC) condition, use of gross area for calculation: Eta_ref = Umpp * Impp / (I_ref*PV_area_gross) 
+simple
+real
+3
++
+0
+1
+[ ; ]
+0.15
+0
+-
+Dimensionless
+PVTmode - mode for PV cell temperature calculation
+SN
+2
+1 - PVT: connection to solar thermal fluid temperature
+2 - PV: stand-alone calculation (Faiman model)
+simple
+integer
+3
++
+1
+2
+[ ; ]
+1
+0
+-
+Dimensionless
+b0 - constant for IAM
+SN
+1
+constant for the calculation of incidence angle losses according to b0 equation
+simple
+real
+3
++
+0
+1
+[ ; ]
+0.07
+0
+-
+Dimensionless
+beta - temperature coefficient of solar cell efficiency
+SN
+1
+temperature coefficient of solar cell efficiency in %/K (posivite value)
+simple
+real
+3
++
+0
+1
+[ ; ]
+0.43
+0
+-
+Dimensionless
+Tcell_ref - PV Cell temperature at reference conditions 
+SN
+1
+PV Cell temperature at reference (usually STC) conditions
+simple
+real
+3
++
+-Inf
++Inf
+[ ; ]
+25
+0
+C
+Temperature
+Uabsfl - internal heat transfer coefficient connecting cell and fluid temperature
+SN
+1
+Internal heat transfer coefficient connecting the PV cell temperature and the mean fluid temperature of the PVT collector (only for PVTmode 1)
+simple
+real
+3
++
+0
++Inf
+[ ; ]
+65.5
+0
+W/m^2.K
+Heat Transfer Coeff.
+PVmode - mode for the irradiance dependence calculation of the PV efficiency
+SN
+3
+Mode for the calculation of the PV efficiency irradiance dependence at reference temperature
+1: Calculation in MPP according to Heydenreich et al.
+2: not defined
+simple
+integer
+3
++
+1
+2
+[ ; ]
+1
+0
+-
+Dimensionless
+a - model parameter a for PV efficiency
+SN
+1
+model parameter "a" for the calculation of the PV efficiency irradiance dependence at reference temperature (only for PVmode 1)
+simple
+real
+3
++
+-Inf
++Inf
+[ ; ]
+-0.0000109
+0
+m2/W
+Inverse Flux
+b - model parameter a for PV efficiency
+SN
+1
+model parameter "b" for the calculation of the PV efficiency irradiance dependence at reference temperature (only for PVmode 1)
+simple
+real
+3
++
+-Inf
++Inf
+[ ; ]
+-0.047
+0
+-
+Dimensionless
+c - model parameter a for PV efficiency
+SN
+1
+model parameter "c" for the calculation of the PV efficiency irradiance dependence at reference temperature (only for PVmode 1)
+simple
+real
+3
++
+-Inf
++Inf
+[ ; ]
+-1.40
+0
+-
+Dimensionless
+U0 - coeff. for module temperature (radiation)
+SN
+1
+coefficient describing the effect of the radiation on the module temperature in the Faiman model (only for PVTmode 2)
+simple
+real
+3
++
+-Inf
++Inf
+[ ; ]
+30.02
+0
+W/m^2.K
+Heat Transfer Coeff.
+U1 - coeff. for module temperature (wind)
+SN
+1
+coefficient describing the cooling by the wind in the Faiman model (only for PVTmode 2)
+simple
+real
+3
++
+-Inf
++Inf
+[ ; ]
+6.28
+0
+W.s/m^3.K
+Wind Dependent Collector Loss Coefficient
+u - wind speed in the PV plane
+SN
+1
+wind speed in the PV plane (only for PVTmode 2)
+simple
+real
+1
++
+0
++Inf
+[ ; ]
+0
+0
+m/s
+Velocity
+Tamb - ambient air temperature
+SN
+1
+Ambient air temperature (only for PVT mode 2)
+simple
+real
+1
++
+-Inf
++Inf
+[ ; ]
+0
+0
+C
+Temperature
+0
+0
+0
+0
+0
+
+*** trnModel specific properties ***
+1
+835
+
+
+
+
+0
+
+
+
+0
+
+
+
+0
+
+
+
+0
+
+
+
+0
+6
+
+
+
+0
+
+
+0
+
+
+
+0
+
+
+0
+
+
+
+0
+
+
+0
+
+
+
+0
+
+
+0
+
+
+
+0
+
+
+0
+
+
+
+13
+Area - Area of the  PVT collectors or PV modules (gross area)
+Eta_ref - electrical efficiency at reference conditions (gross area)
+PVTmode - mode for PV cell temperature calculation
+b0 - constant for IAM
+beta - temperature coefficient of solar cell efficiency
+Tcell_ref - PV Cell temperature at reference conditions 
+Uabsfl - internal heat transfer coefficient connecting cell and fluid temperature
+PVmode - mode for the irradiance dependence calculation of the PV efficiency
+a - model parameter a for PV efficiency
+b - model parameter a for PV efficiency
+c - model parameter a for PV efficiency
+U0 - coeff. for module temperature (radiation)
+U1 - coeff. for module temperature (wind)
+
+
+0
+0
+0
+5
+0
+
+
+1
+100
+0
+2
+0
+
+
+1
+100
+0
+12
+0
+
+
+1
+100
+-1
+-1
+0
+
+
+1
+100
