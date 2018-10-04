@@ -11,7 +11,7 @@ Universität des Saarlandes
 18
 August 21, 2017
 Universität des Saarlandes
-January 23, 2018
+October 2, 2018
 1
 
 noowner
@@ -325,7 +325,7 @@ real
 0
 -
 Dimensionless
-Uabsfl - internal heat transfer coefficient connecting cell and fluid temperature
+Ucellfl - internal heat transfer coefficient connecting cell and fluid temperature
 SN
 1
 Internal heat transfer coefficient connecting the PV cell temperature and the mean fluid temperature of the PVT collector (only for PVTmode 1)
@@ -556,7 +556,7 @@ Tcell_ref - PV Cell temperature at reference conditions
 a - model parameter a for PV efficiency
 b - model parameter a for PV efficiency
 c - model parameter a for PV efficiency
-Uabsfl - internal heat transfer coefficient connecting cell and fluid temperature
+Ucellfl - internal heat transfer coefficient connecting cell and fluid temperature
 U0 - coeff. for module temperature (radiation)
 U1 - coeff. for module temperature (wind)
 Tcell_NOCT - PV Cell temperature at NOCT conditions
