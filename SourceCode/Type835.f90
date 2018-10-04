@@ -7,27 +7,35 @@
 ! Author: Danny Jonas
 ! Editor: Danny Jonas
 ! Date:	 August 18, 2017
-! last modified: January 19, 2018
+! Version: 3.1    
+! last modified: February 22, 2018
 ! 
 ! Modifications: 
 !           19.01.2018, DJ: Change Tref ind Tcell_ref and gross area as information added
-!
+!           23.01.2018, DJ: Change and add model parameters, inputs and outputs to version 2.0   
+!           23.01.2018, DJ: Change code to version 3.0            
+!           22.02.2018, DJ: Bugfixes: Additional Calculation for theta in radians, maximum for theta and PRiam for negative values equal to zero 
 ! *** 
 ! *** Model Parameters 
 ! *** 
-!			Area - Area of the  PVT collectors or PV modules (gross area)	m^2 [0;+Inf]
-!			Eta_ref - electrical efficiency at reference conditions	(gross area) - [0;1]
 !			PVTmode - mode for PV cell temperature calculation	- [1;2]
+!			PVmode - mode for the irradiance dependence calculation of the PV efficiency	- [1;1]
+!			PVcellmode - mode for PV cell temperature calculation of stand-alone PV	- [1;3]
+!			Area - Area of the  PVT collectors or PV modules (gross area)	m^2 [0;+Inf]
+!			Eta_ref - electrical efficiency at reference conditions (gross area)	- [0;1]
 !			b0 - constant for IAM	- [0;1]
-!			beta - temperature coefficient of solar cell efficiency	any [0;1]
-!			Tcell_ref - Cell temperature at reference conditions 	C [-Inf;+Inf]
-!			Uabsfl - internal heat transfer coefficient connecting cell and fluid temperature	W/m^2.K [0;+Inf]
-!			PVmode - mode for the irradiance dependence calculation of the PV efficiency	- [1;2]
+!			beta - temperature coefficient of solar cell efficiency	- [0;1]
+!			Tcell_ref - PV Cell temperature at reference conditions 	C [-Inf;+Inf]
 !			a - model parameter a for PV efficiency	m2/W [-Inf;+Inf]
 !			b - model parameter a for PV efficiency	- [-Inf;+Inf]
 !			c - model parameter a for PV efficiency	- [-Inf;+Inf]
+!			Uabsfl - internal heat transfer coefficient connecting cell and fluid temperature	W/m^2.K [0;+Inf]
 !			U0 - coeff. for module temperature (radiation)	W/m^2.K [-Inf;+Inf]
-!			U1 - coeff. for module temperature (wind) W.s/m^3.K [-Inf;+Inf]
+!			U1 - coeff. for module temperature (wind)	W.s/m^3.K [-Inf;+Inf]
+!			Tcell_NOCT - PV Cell temperature at NOCT conditions	C [-Inf;+Inf]
+!			Tamb_NOCT - ambient temperature at NOCT conditions	C [-Inf;+Inf]
+!			It_NOCT - Global radiation on PV plane at NOCT conditions	W/m^2 [0;+Inf]
+!			Taualpha - effective transmittance-absorptance product 	- [0;1]
 
 ! *** 
 ! *** Model Inputs 
@@ -38,13 +46,14 @@
 !			qth - specific thermal power output of the PVT collector	kJ/hr.m^2 [-Inf;+Inf]
 !			u - wind speed in the PV plane	m/s [0;+Inf]
 !			Tamb - ambient air temperature	C [-Inf;+Inf]
+!			Tcell_in - temperature of the PV cell	C [-Inf;+Inf]
 
 ! *** 
 ! *** Model Outputs 
 ! *** 
 !			Pel - Electric power output	kJ/hr [-Inf;+Inf]
 !			Tcell - temperature of the PV cell	C [-Inf;+Inf]
-!			Eta PV - total efficiency of PV modules (gross area) % (base 1) [0;1]
+!			EtaPV - total efficiency of PV modules (gross area)	- [0;1]
 
 ! *** 
 ! *** Model Derivatives 
@@ -78,19 +87,24 @@
 
 
 !    PARAMETERS
+      INTEGER PVTmode
+      INTEGER PVmode
+      INTEGER PVcellmode
       DOUBLE PRECISION Area
       DOUBLE PRECISION Eta_ref
-      INTEGER PVTmode
       DOUBLE PRECISION b0
       DOUBLE PRECISION beta
       DOUBLE PRECISION Tcell_ref
-      DOUBLE PRECISION Uabsfl
-      INTEGER PVmode
       DOUBLE PRECISION a
       DOUBLE PRECISION b
       DOUBLE PRECISION c
+      DOUBLE PRECISION Uabsfl
       DOUBLE PRECISION U0
-      DOUBLE PRECISION U1     
+      DOUBLE PRECISION U1 
+      DOUBLE PRECISION Tcell_NOCT
+      DOUBLE PRECISION Tamb_NOCT
+      DOUBLE PRECISION It_NOCT
+      DOUBLE PRECISION Taualpha
       
 !    INPUTS
       DOUBLE PRECISION It
@@ -99,6 +113,7 @@
       DOUBLE PRECISION qth
       DOUBLE PRECISION u
       DOUBLE PRECISION Tamb
+      DOUBLE PRECISION Tcell_in
 
 !    OUTPUTS
       DOUBLE PRECISION Pel
@@ -111,6 +126,8 @@
       DOUBLE PRECISION PRg
       DOUBLE PRECISION PRtot
       DOUBLE PRECISION Pelspec
+      DOUBLE PRECISION k1
+      DOUBLE PRECISION k2
 !-----------------------------------------------------------------------------------------------------------------------
 
 !-----------------------------------------------------------------------------------------------------------------------
@@ -148,8 +165,8 @@
       If(getIsFirstCallofSimulation()) Then
 
 		!Tell the TRNSYS Engine How This Type Works
-		Call SetNumberofParameters(13)           !The number of parameters that the the model wants
-		Call SetNumberofInputs(6)                   !The number of inputs that the the model wants
+		Call SetNumberofParameters(18)           !The number of parameters that the the model wants
+		Call SetNumberofInputs(7)                   !The number of inputs that the the model wants
 		Call SetNumberofDerivatives(0)         !The number of derivatives that the the model wants
 		Call SetNumberofOutputs(3)                 !The number of outputs that the the model produces
 		Call SetIterationMode(1)                             !An indicator for the iteration mode (default=1).  Refer to section 8.4.3.5 of the documentation for more details.
@@ -163,6 +180,7 @@
         Call SetInputUnits(4,'IR1')
         Call SetInputUnits(5,'VE1')
         Call SetInputUnits(6,'TE1')
+        Call SetInputUnits(7,'TE1')
           
         Call SetOutputUnits(1,'PW1')
         Call SetOutputUnits(2,'TE1')
@@ -176,20 +194,24 @@
 !-----------------------------------------------------------------------------------------------------------------------
 !Do All of the First Timestep Manipulations Here - There Are No Iterations at the Intial Time
       If (getIsStartTime()) Then
-      Area = getParameterValue(1)
-      Eta_ref = getParameterValue(2)
-      PVTmode = getParameterValue(3)
-      b0 = getParameterValue(4)
-      beta = getParameterValue(5)
-      Tcell_ref = getParameterValue(6)
-      Uabsfl = getParameterValue(7)*3.6d0
-      PVmode = getParameterValue(8)
+      PVTmode = getParameterValue(1)
+      PVmode = getParameterValue(2)
+      PVcellmode = getParameterValue(3)
+      Area = getParameterValue(4)
+      Eta_ref = getParameterValue(5)
+      b0 = getParameterValue(6)
+      beta = getParameterValue(7)
+      Tcell_ref = getParameterValue(8)
       a = getParameterValue(9)
       b = getParameterValue(10)
       c = getParameterValue(11)
-      U0 = getParameterValue(12)*3.6d0
-      U1 = getParameterValue(13)*3.6d0
-
+      Uabsfl = getParameterValue(12)*3.6d0
+      U0 = getParameterValue(13)*3.6d0
+      U1 = getParameterValue(14)*3.6d0
+      Tcell_NOCT = getParameterValue(15)
+      Tamb_NOCT = getParameterValue(16)
+      It_NOCT = getParameterValue(17)*3.6d0
+      Taualpha = getParameterValue(18)
 
       It = GetInputValue(1)
       Theta = GetInputValue(2)
@@ -197,6 +219,7 @@
       qth = GetInputValue(4)
       u = GetInputValue(5)
       Tamb = GetInputValue(6)
+      Tcell_in = GetInputValue(7)
 
 	
    !Check the Parameters for Problems (#,ErrorType,Text)
@@ -226,20 +249,26 @@
 !ReRead the Parameters if Another Unit of This Type Has Been Called Last
       If(getIsReReadParameters()) Then
 		!Read in the Values of the Parameters from the Input File
-      Area = getParameterValue(1)
-      Eta_ref = getParameterValue(2)
-      PVTmode = getParameterValue(3)
-      b0 = getParameterValue(4)
-      beta = getParameterValue(5)
-      Tcell_ref = getParameterValue(6)
-      Uabsfl = getParameterValue(7)*3.6d0
-      PVmode = getParameterValue(8)
+      PVTmode = getParameterValue(1)
+      PVmode = getParameterValue(2)
+      PVcellmode = getParameterValue(3)
+      Area = getParameterValue(4)
+      Eta_ref = getParameterValue(5)
+      b0 = getParameterValue(6)
+      beta = getParameterValue(7)
+      Tcell_ref = getParameterValue(8)
       a = getParameterValue(9)
       b = getParameterValue(10)
       c = getParameterValue(11)
-      U0 = getParameterValue(12)*3.6d0
-      U1 = getParameterValue(13)*3.6d0
-		
+      Uabsfl = getParameterValue(12)*3.6d0
+      U0 = getParameterValue(13)*3.6d0
+      U1 = getParameterValue(14)*3.6d0
+      Tcell_NOCT = getParameterValue(15)
+      Tamb_NOCT = getParameterValue(16)
+      It_NOCT = getParameterValue(17)*3.6d0
+      Taualpha = getParameterValue(18)
+          
+  		
       EndIf
 !-----------------------------------------------------------------------------------------------------------------------
 
@@ -250,6 +279,7 @@
       qth = GetInputValue(4)
       u = GetInputValue(5)
       Tamb = GetInputValue(6)
+      Tcell_in = GetInputValue(7)
 		
 
 	!Check the Inputs for Problems (#,ErrorType,Text)
@@ -293,23 +323,62 @@
 !------------------------------------------------------------------------------
 !    Calculation of PR IAM
 !------------------------------------------------------------------------------
-      
-    PRiam = 1.d0-b0*(1/cos(Theta)-1) 
-      
+    
+    If(Theta>=90) Then
+    Theta = 89.99d0
+    Endif
+    
+    PRiam = 1.d0-b0*(1.d0/cos(Theta*3.1415927d0/180.d0)-1.d0) 
+    
+    If(PRiam<0) Then
+    PRiam = 0.d0
+    EndIf
+    
 !---------------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+!    Calculation of PR G
+!------------------------------------------------------------------------------
+    
+    PRg = a*It/3.6d0+b*LOG(It/3.6d0+1.d0)+c*((LOG(It/3.6d0+EXP(1.d0)))**2.d0/(It/3.6d0+1.d0)-1.d0) 
+ 
+    
+!------------------------------------------------------------------------------
 !    Calculation of Tcell
 !------------------------------------------------------------------------------
 
-    If(PVTmode==1) Then
+    If(PVTmode==1) Then                         ! PVT model, internal calculation of cell temperature
     
     Tcell = qth/(Uabsfl)+Tm 
     
-    Else
+    Elseif(PVTmode==2) Then                     ! PV model
+                      
+        If(PVcellmode==1) Then                  ! Faiman model
     
-    Tcell = Tamb + It/(U0+U1*u)
+        Tcell = Tamb + It/(U0+U1*u)
+        
+        Elseif(PVcellmode==2) Then              ! NOCT model, constant heat loss coefficient
+            
+! Tcell = Tamb + It/It_NOCT * (Tcell_NOCT-Tamb_NOCT) * (1-Eta_ref/Taualpha)
+  
+        k1 = Eta_ref*PRiam*PRg
+        k2 = It/It_NOCT * (Tcell_NOCT-Tamb_NOCT)
+        Tcell = (Tamb + k2 * (1.d0-k1/Taualpha*(1.d0+beta/100.d0*Tcell_ref)))/(1.d0-k1*k2/Taualpha*beta/100.d0)
+            
+        Else                                    ! NOCT model, wind speed dependet heat loss coefficient
+    
+!      Tcell = Tamb + It/It_NOCT * 9.5d0/(5.7d0+3.8d0*u) * (Tcell_NOCT-Tamb_NOCT) * (1-Eta_ref/Taualpha)
+            
+        k1 = Eta_ref*PRiam*PRg
+        k2 = It/It_NOCT * 9.5d0/(5.7d0+3.8d0*u) * (Tcell_NOCT-Tamb_NOCT)
+        Tcell = (Tamb + k2 * (1.d0-k1/Taualpha*(1.d0+beta/100.d0*Tcell_ref)))/(1.d0-k1*k2/Taualpha*beta/100.d0)
+        
+        Endif
+        
+    Else
+        
+    Tcell = Tcell_in                            ! PVT model, external calculation of cell temperature
     
     Endif
 !---------------------------------------------------------------------------------------
@@ -319,16 +388,12 @@
 !    Calculation of PR T
 !------------------------------------------------------------------------------
       
-    PRt = 1.d0 - beta/100 * (Tcell-Tcell_ref) 
+    PRt = 1.d0 - beta/100.d0 * (Tcell-Tcell_ref) 
       
 !---------------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
-!    Calculation of PR G
-!------------------------------------------------------------------------------
-      
-    PRg = a*It/3.6d0+b*LOG(It/3.6d0+1.d0)+c*((LOG(It/3.6d0+EXP(1.d0)))**2.d0/(It/3.6d0+1.d0)-1.d0) 
+
       
 !---------------------------------------------------------------------------------------
 
