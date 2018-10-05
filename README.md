@@ -15,7 +15,7 @@ As addition, the model includes a PV mode to simulate PV modules based on the sa
 ![](Figures/Type835_Thermal_network.png) 
 Fig. 2. Thermal network. 
 
-In case of PVT collectors, the PVT cell temperature T_cell is calculated via an equivalent thermal network with an internal heat transfer coefficient U_(cell-fl), which connects the PVT cell temperature with the mean fluid temperature T_m of the PVT collector (see Fig. 2), according to the electrical performance model of Lämmle et al. (2017). In case of PV modules, the PV cell temperature is calculated by the Faiman model (Faiman, 2008) or from NOCT conditions.  For further details see Documentation.
+In case of PVT collectors, the PVT cell temperature `T_cell` is calculated via an equivalent thermal network with an internal heat transfer coefficient `U_(cell-fl)`, which connects the PVT cell temperature with the mean fluid temperature `T_m` of the PVT collector (see Fig. 2), according to the electrical performance model of Lämmle et al. (2017). In case of PV modules, the PV cell temperature is calculated by the Faiman model (Faiman, 2008) or from NOCT conditions.  For further details see Documentation.
 
 ## References
 Faiman, D., 2008. Assessing the outdoor operating temperature of photovoltaic modules. Progress in Photovoltaics: Research and Applications 16, 307–315.
