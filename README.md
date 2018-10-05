@@ -28,5 +28,5 @@ ISO 9806, 2017. ISO 9806:2017 Solar energy - Solar thermal collectors – Test m
 
 Lämmle, M., Oliva, A., Hermann, M., Kramer, K., Kramer, W., 2017. PVT collector technologies in solar thermal systems: A systematic assessment of electrical and thermal yields with the novel characteristic temperature approach. Solar Energy 155, 867-879.
 
-10.5281/zenodo.1446414
+https://zenodo.org/badge/DOI/10.5281/zenodo.1446415.svg
 
