@@ -1,5 +1,5 @@
 # TRNSYS_Type835_PVT
-TRNSYS `Type835` is a PV model for the coupling with solar thermal absorber and collector models as PVT model developed for use in TRNSYS 17.
+`Type835` is a PV model for the coupling with solar thermal absorber and collector models as PVT model developed for use in TRNSYS 17.
 
 ## License
 See the [LICENSE](LICENSE) file for license rights and limitations (MIT).
