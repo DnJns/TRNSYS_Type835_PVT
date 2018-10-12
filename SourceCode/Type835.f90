@@ -7,8 +7,8 @@
 ! Author: Danny Jonas
 ! Editor: Danny Jonas
 ! Date:	 August 18, 2017
-! Version: 3.1    
-! last modified: October 02, 2018
+! Version: 3.3   
+! last modified: October 11, 2018
 ! 
 ! Modifications: 
 !           19.01.2018, DJ: Change Tref ind Tcell_ref and gross area as information added
@@ -16,14 +16,19 @@
 !           23.01.2018, DJ: Change code to version 3.0            
 !           22.02.2018, DJ: Bugfixes: Additional Calculation for theta in radians, maximum for theta and PRiam for negative values equal to zero 
 !           02.10.2018, DJ: Bugfixes: It for negative values equal to zero; Nomenclature Ucellfl
+!           11.10.2018, DJ: - Add Error Types / Parameter Checking
+!                           - Set all numbers as DoublePrecision values .d0 (including output values)
+!                           - Delete Input values at StartTime Manipulations
+!                           - Change PRiam calculation with PRiam zero if there is no incident solar, or if the incidence angle is 
+!                           lower / greater than the possible acceptance angle (0° - 90°)
 ! *** 
 ! *** Model Parameters 
 ! *** 
 !			PVTmode - mode for PV cell temperature calculation	- [1;2]
 !			PVmode - mode for the irradiance dependence calculation of the PV efficiency	- [1;1]
 !			PVcellmode - mode for PV cell temperature calculation of stand-alone PV	- [1;3]
-!			Area - Area of the  PVT collectors or PV modules (gross area)	m^2 [0;+Inf]
-!			Eta_ref - electrical efficiency at reference conditions (gross area)	- [0;1]
+!			Area - Area of the  PVT collectors or PV modules 	m^2 [0;+Inf]
+!			Eta_ref - electrical efficiency at reference conditions 	- [0;1]
 !			b0 - constant for IAM	- [0;1]
 !			beta - temperature coefficient of solar cell efficiency	- [0;1]
 !			Tcell_ref - PV Cell temperature at reference conditions 	C [-Inf;+Inf]
@@ -213,23 +218,23 @@
       Tamb_NOCT = getParameterValue(16)
       It_NOCT = getParameterValue(17)*3.6d0
       Taualpha = getParameterValue(18)
-
-      It = GetInputValue(1)
-      Theta = GetInputValue(2)
-      Tm = GetInputValue(3)
-      qth = GetInputValue(4)
-      u = GetInputValue(5)
-      Tamb = GetInputValue(6)
-      Tcell_in = GetInputValue(7)
-
 	
    !Check the Parameters for Problems (#,ErrorType,Text)
+      If (Area < 0.d0) Call foundBadParameter(4,'Fatal','The area cannot be negative.')
+      If ((Eta_ref < 0.d0) .or. (Eta_ref > 1.d0)) Call foundBadParameter(5,'Fatal','The electrical efficiency at reference conditions must be between 0 and 1.')
+      If ((b0 < 0.d0) .or. (b0 > 1.d0)) Call foundBadParameter(6,'Fatal','The constant for IAM (b0) must be between 0 and 1.')
+      If ((beta < 0.d0) .or. (beta > 1.d0)) Call foundBadParameter(7,'Fatal','The temperature coefficient of the solar cell efficiency must be between 0 and 1.')
+      If (Ucellfl < 0.d0) Call foundBadParameter(12,'Fatal','The internal heat transfer coefficient connecting cell and fluid temperature cannot be negative.')
+      If (It_NOCT < 0.d0) Call foundBadParameter(17,'Fatal','The global radiation on PV plane at NOCT conditions cannot be negative.')
+      If ((Taualpha < 0.d0) .or. (Taualpha > 1.d0)) Call foundBadParameter(18,'Fatal','The effective transmittance-absorptance product must be between 0 and 1.')
+      If (ErrorFound()) Return
+      
    !Sample Code: If( PAR1 <= 0.) Call FoundBadParameter(1,'Fatal','The first parameter provided to this model is not acceptable.')
 
    !Set the Initial Values of the Outputs (#,Value)
-		Call SetOutputValue(1, 0) ! Pel - Electric power output
-		Call SetOutputValue(2, 0) ! Tcell - temperature of the PV cell
-		Call SetOutputValue(3, 0) ! EtaPV - total efficiency of PV modules
+		Call SetOutputValue(1, 0.d0) ! Pel - Electric power output
+		Call SetOutputValue(2, 0.d0) ! Tcell - temperature of the PV cell
+		Call SetOutputValue(3, 0.d0) ! EtaPV - total efficiency of PV modules
 
 
    !If Needed, Set the Initial Values of the Static Storage Variables (#,Value)
@@ -268,8 +273,7 @@
       Tamb_NOCT = getParameterValue(16)
       It_NOCT = getParameterValue(17)*3.6d0
       Taualpha = getParameterValue(18)
-          
-  		
+
       EndIf
 !-----------------------------------------------------------------------------------------------------------------------
 
@@ -285,7 +289,8 @@
 
 	!Check the Inputs for Problems (#,ErrorType,Text)
 	!Sample Code: If( IN1 <= 0.) Call FoundBadInput(1,'Fatal','The first input provided to this model is not acceptable.')
- 
+      If(It < 0.d0) Call FoundBadInput(1,'Fatal','The global radiation on PV / PVT plane cannot be negative.')
+      If(u < 0.d0) Call FoundBadInput(5,'Fatal','The wind speed in the PV plane cannot be negative.')
       If(ErrorFound()) Return
 !-----------------------------------------------------------------------------------------------------------------------
 
@@ -324,15 +329,25 @@
 !------------------------------------------------------------------------------
 !    Calculation of PR IAM
 !------------------------------------------------------------------------------
+!Set the PRiam to zero if there is no incident solar, or if the incidence angle theta is 
+!lower / greater than the possible acceptance angle (0° - 90°)
+
+    If((It<=0.d0).or.(Theta<0.d0).or.(Theta>=90.d0)) Then
     
-    If(Theta>=90) Then
-    Theta = 89.99d0
-    Endif
+    PRiam = 0.d0
+    
+    Else
     
     PRiam = 1.d0-b0*(1.d0/cos(Theta*3.1415927d0/180.d0)-1.d0) 
+
+    Endif
+
+    ! Set PRiam to zero if PRiam is negative
     
-    If(PRiam<0) Then
+    If(PRiam<0.d0) Then
+   
     PRiam = 0.d0
+   
     EndIf
     
 !---------------------------------------------------------------------------------------
@@ -342,7 +357,7 @@
 !    Calculation of PR G
 !------------------------------------------------------------------------------
     
-    If(It>0) Then
+    If(It>0.d0) Then
     
     PRg = a*It/3.6d0+b*LOG(It/3.6d0+1.d0)+c*((LOG(It/3.6d0+EXP(1.d0)))**2.d0/(It/3.6d0+1.d0)-1.d0) 
  
@@ -374,7 +389,7 @@
         k2 = It/It_NOCT * (Tcell_NOCT-Tamb_NOCT)
         Tcell = (Tamb + k2 * (1.d0-k1/Taualpha*(1.d0+beta/100.d0*Tcell_ref)))/(1.d0-k1*k2/Taualpha*beta/100.d0)
             
-        Else                                    ! NOCT model, wind speed dependet heat loss coefficient
+        Else                                    ! NOCT model, wind speed dependent heat loss coefficient
     
 !      Tcell = Tamb + It/It_NOCT * 9.5d0/(5.7d0+3.8d0*u) * (Tcell_NOCT-Tamb_NOCT) * (1-Eta_ref/Taualpha)
             

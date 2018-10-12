@@ -11,7 +11,7 @@ Universität des Saarlandes
 18
 August 21, 2017
 Universität des Saarlandes
-October 2, 2018
+October 11, 2018
 1
 
 noowner
@@ -44,7 +44,7 @@ __
 __
 __
 28
-It - Global radiation on PV plane
+It - Global radiation on PV / PVT plane
 SN
 1
 
@@ -134,7 +134,7 @@ real
 0
 C
 Temperature
-EtaPV - total efficiency of PV modules (gross area)
+EtaPV - total efficiency of PV modules
 SN
 1
 Gross area used for calculation
@@ -202,10 +202,10 @@ integer
 0
 -
 Dimensionless
-Area - Area of the  PVT collectors or PV modules (gross area)
+Area - Area of the  PVT collectors or PV modules
 SN
 1
-Area of the  PVT collectors (PVTmode 1) or PV modules (PVmode 2), gross area
+Area of the  PVT collectors (PVTmode 1) or PV modules (PVmode 2)
 simple
 real
 3
@@ -217,10 +217,10 @@ real
 0
 m^2
 Area
-Eta_ref - electrical efficiency at reference conditions (gross area)
+Eta_ref - electrical efficiency at reference conditions
 SN
 1
-Electrical efficiency at reference (usually STC) condition, use of gross area for calculation: Eta_ref = Umpp * Impp / (I_ref*PV_area_gross)
+Electrical efficiency at reference (usually STC) condition
 simple
 real
 3
@@ -548,8 +548,8 @@ Temperature
 PVTmode - mode for PV cell temperature calculation
 PVmode - mode for the irradiance dependence calculation of the PV efficiency
 PVcellmode - mode for PV cell temperature calculation of stand-alone PV
-Area - Area of the  PVT collectors or PV modules (gross area)
-Eta_ref - electrical efficiency at reference conditions (gross area)
+Area - Area of the  PVT collectors or PV modules
+Eta_ref - electrical efficiency at reference conditions
 b0 - constant for IAM
 beta - temperature coefficient of solar cell efficiency
 Tcell_ref - PV Cell temperature at reference conditions 
