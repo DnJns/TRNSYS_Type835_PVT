@@ -13,7 +13,7 @@ Fig. 1. Coupled PVT model.
 As addition, the model includes a PV mode to simulate PV modules based on the same performance model, e.g. for a comparison of the electrical yield of a PV module and PVT collectors using identical PV cells. The major difference between the calculation of PV modules and PVT collectors in this approach results from the cell temperatures, which are determined by the fluid temperature in PVT collectors and by a steady-state module temperature in PV modules.
 
 ![](Figures/Type835_Thermal_network.png) 
-Fig. 2. Thermal network . 
+Fig. 2. Thermal network. 
 
 In case of PVT collectors, the PVT cell temperature `T_cell` is calculated via an equivalent thermal network with an internal heat transfer coefficient `U_(cell-fl)`, which connects the PVT cell temperature with the mean fluid temperature `T_m` of the PVT collector (see Fig. 2), according to the electrical performance model of Lämmle et al. (2017). In case of PV modules, the PV cell temperature is calculated by the Faiman model (Faiman, 2008) or from NOCT conditions.  For further details see Documentation.
 
