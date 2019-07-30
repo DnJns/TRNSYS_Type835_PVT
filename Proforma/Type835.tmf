@@ -11,7 +11,7 @@ Universität des Saarlandes
 18
 August 21, 2017
 Universität des Saarlandes
-October 11, 2018
+July 30, 2019
 1
 
 noowner
@@ -340,10 +340,10 @@ real
 0
 W/m^2.K
 Heat Transfer Coeff.
-U0 - coeff. for module temperature (radiation)
+U0 - Heat loss coeff. of PV module 
 SN
 1
-coefficient describing the effect of the radiation on the module temperature in the Faiman model (only for PVTmode 2)
+Heat loss coefficient of a PV module in the Faiman model (only for PVTmode 2)
 simple
 real
 3
@@ -355,10 +355,10 @@ real
 0
 W/m^2.K
 Heat Transfer Coeff.
-U1 - coeff. for module temperature (wind)
+U1 - Wind dependent heat loss coeff. of PV module 
 SN
 1
-coefficient describing the cooling by the wind in the Faiman model (only for PVTmode 2)
+Wind dependent heat loss coefficient of a PV module in the Faiman model (only for PVTmode 2)
 simple
 real
 3
@@ -557,8 +557,8 @@ a - model parameter a for PV efficiency
 b - model parameter a for PV efficiency
 c - model parameter a for PV efficiency
 Ucellfl - internal heat transfer coefficient connecting cell and fluid temperature
-U0 - coeff. for module temperature (radiation)
-U1 - coeff. for module temperature (wind)
+U0 - Heat loss coeff. of PV module 
+U1 - Wind dependent heat loss coeff. of PV module 
 Tcell_NOCT - PV Cell temperature at NOCT conditions
 Tamb_NOCT - ambient temperature at NOCT conditions
 It_NOCT - Global radiation on PV plane at NOCT conditions
